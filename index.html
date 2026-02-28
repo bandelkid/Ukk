@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Aplikasi Perpustakaan Sederhana</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 30px;
+        }
+        input, button {
+            margin: 5px;
+            padding: 5px;
+        }
+        .box {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>📚 FORM PEMINJAMAN</h2>
+
+<div class="box">
+    <input type="text" id="kodePinjam" placeholder="Kode Pinjam">
+    <input type="date" id="tanggalPinjam">
+    <input type="text" id="namaAnggota" placeholder="Nama Anggota">
+    <input type="number" id="jumlahBuku" placeholder="Jumlah Buku (Max 2)">
+    <br>
+    <input type="text" id="isbn1" placeholder="ISBN Buku 1">
+    <input type="text" id="isbn2" placeholder="ISBN Buku 2 (Opsional)">
+    <br>
+    <button onclick="pinjamBuku()">Simpan Peminjaman</button>
+</div>
+
+<h2>📦 FORM PENGEMBALIAN</h2>
+
+<div class="box">
+    <input type="text" id="kodeKembali" placeholder="Kode Pinjam">
+    <input type="date" id="tanggalKembali">
+    <button onclick="kembalikanBuku()">Proses Pengembalian</button>
+</div>
+
+<h2>📋 DATA PEMINJAMAN</h2>
+<div id="output"></div>
+
+<script>
+
+// ===== ARRAY DATA BUKU =====
+let buku = [
+    {isbn: "111", judul: "JavaScript Dasar"},
+    {isbn: "222", judul: "Algoritma & Struktur Data"},
+    {isbn: "333", judul: "Pemrograman Web"}
+];
+
+// ===== ARRAY DATA PINJAM =====
+let dataPinjam = [];
+
+// ===== FUNGSI PINJAM =====
+function pinjamBuku() {
+
+    let kode = document.getElementById("kodePinjam").value;
+    let tglPinjam = document.getElementById("tanggalPinjam").value;
+    let nama = document.getElementById("namaAnggota").value;
+    let jumlah = parseInt(document.getElementById("jumlahBuku").value);
+    let isbn1 = document.getElementById("isbn1").value;
+    let isbn2 = document.getElementById("isbn2").value;
+
+    // CEK KODE SUDAH ADA
+    let found = dataPinjam.find(item => item.kode === kode);
+    if (found) {
+        alert("Kode sudah ada!");
+        return;
+    }
+
+    // CEK MAKSIMAL 2 BUKU
+    if (jumlah > 2) {
+        alert("Maksimal 2 buku!");
+        return;
+    }
+
+    // SIMPAN DATA
+    dataPinjam.push({
+        kode: kode,
+        tanggalPinjam: tglPinjam,
+        nama: nama,
+        isbn1: isbn1,
+        isbn2: isbn2,
+        tanggalKembali: null,
+        denda: 0
+    });
+
+    alert("Data Peminjaman Berhasil Disimpan!");
+    tampilkanData();
+}
+
+// ===== FUNGSI PENGEMBALIAN =====
+function kembalikanBuku() {
+
+    let kode = document.getElementById("kodeKembali").value;
+    let tglKembali = document.getElementById("tanggalKembali").value;
+
+    let transaksi = dataPinjam.find(item => item.kode === kode);
+
+    if (!transaksi) {
+        alert("Kode tidak ditemukan!");
+        return;
+    }
+
+    let tglPinjam = new Date(transaksi.tanggalPinjam);
+    let kembali = new Date(tglKembali);
+
+    let selisih = (kembali - tglPinjam) / (1000 * 60 * 60 * 24);
+
+    let denda = 0;
+    if (selisih > 5) {
+        let lewatHari = selisih - 5;
+        denda = lewatHari * 5000;
+    }
+
+    transaksi.tanggalKembali = tglKembali;
+    transaksi.denda = denda;
+
+    alert("Denda: Rp " + denda);
+    tampilkanData();
+}
+
+// ===== TAMPILKAN DATA =====
+function tampilkanData() {
+
+    let output = "<table border='1' cellpadding='5'>";
+    output += "<tr><th>Kode</th><th>Nama</th><th>Tgl Pinjam</th><th>Tgl Kembali</th><th>Denda</th></tr>";
+
+    dataPinjam.forEach(item => {
+        output += `<tr>
+            <td>${item.kode}</td>
+            <td>${item.nama}</td>
+            <td>${item.tanggalPinjam}</td>
+            <td>${item.tanggalKembali ?? "-"}</td>
+            <td>${item.denda}</td>
+        </tr>`;
+    });
+
+    output += "</table>";
+    document.getElementById("output").innerHTML = output;
+}
+
+</script>
+
+</body>
+</html>
