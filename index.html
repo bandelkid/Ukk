@@ -20,7 +20,7 @@
 </head>
 <body>
 
-<h2>📚 FORM PEMINJAMAN</h2>
+<h2>FORM PEMINJAMAN</h2>
 
 <div class="box">
     <input type="text" id="kodePinjam" placeholder="Kode Pinjam">
@@ -28,13 +28,15 @@
     <input type="text" id="namaAnggota" placeholder="Nama Anggota">
     <input type="number" id="jumlahBuku" placeholder="Jumlah Buku (Max 2)">
     <br>
-    <input type="text" id="isbn1" placeholder="ISBN Buku 1">
-    <input type="text" id="isbn2" placeholder="ISBN Buku 2 (Opsional)">
-    <br>
+    <div id="isbnContainer">
+    <input type="text" class="isbn" placeholder="ISBN Buku 1">
+</div>
+
+<button type="button" onclick="tambahBuku()">+ Tambah Buku</button>
     <button onclick="pinjamBuku()">Simpan Peminjaman</button>
 </div>
 
-<h2>📦 FORM PENGEMBALIAN</h2>
+<h2>FORM PENGEMBALIAN</h2>
 
 <div class="box">
     <input type="text" id="kodeKembali" placeholder="Kode Pinjam">
@@ -42,11 +44,28 @@
     <button onclick="kembalikanBuku()">Proses Pengembalian</button>
 </div>
 
-<h2>📋 DATA PEMINJAMAN</h2>
+<h2>DATA PEMINJAMAN</h2>
 <div id="output"></div>
 
 <script>
+function tambahBuku() {
 
+    let container = document.getElementById("isbnContainer");
+    let jumlahInput = document.querySelectorAll(".isbn").length;
+
+    if (jumlahInput >= 2) {
+        alert("Maksimal 2 buku!");
+        return;
+    }
+
+    let inputBaru = document.createElement("input");
+    inputBaru.type = "text";
+    inputBaru.className = "isbn";
+    inputBaru.placeholder = "ISBN Buku " + (jumlahInput + 1);
+
+    container.appendChild(document.createElement("br"));
+    container.appendChild(inputBaru);
+}
 // ===== ARRAY DATA BUKU =====
 let buku = [
     {isbn: "111", judul: "JavaScript Dasar"},
@@ -64,9 +83,14 @@ function pinjamBuku() {
     let tglPinjam = document.getElementById("tanggalPinjam").value;
     let nama = document.getElementById("namaAnggota").value;
     let jumlah = parseInt(document.getElementById("jumlahBuku").value);
-    let isbn1 = document.getElementById("isbn1").value;
-    let isbn2 = document.getElementById("isbn2").value;
+    let isbnInputs = document.querySelectorAll(".isbn");
+let daftarIsbn = [];
 
+isbnInputs.forEach(input => {
+    if (input.value !== "") {
+        daftarIsbn.push(input.value);
+    }
+});
     // CEK KODE SUDAH ADA
     let found = dataPinjam.find(item => item.kode === kode);
     if (found) {
@@ -82,14 +106,13 @@ function pinjamBuku() {
 
     // SIMPAN DATA
     dataPinjam.push({
-        kode: kode,
-        tanggalPinjam: tglPinjam,
-        nama: nama,
-        isbn1: isbn1,
-        isbn2: isbn2,
-        tanggalKembali: null,
-        denda: 0
-    });
+    kode: kode,
+    tanggalPinjam: tglPinjam,
+    nama: nama,
+    daftarIsbn: daftarIsbn,
+    tanggalKembali: null,
+    denda: 0
+});
 
     alert("Data Peminjaman Berhasil Disimpan!");
     tampilkanData();
@@ -130,14 +153,14 @@ function kembalikanBuku() {
 function tampilkanData() {
 
     let output = "<table border='1' cellpadding='5'>";
-    output += "<tr><th>Kode</th><th>Nama</th><th>Tgl Pinjam</th><th>Tgl Kembali</th><th>Denda</th></tr>";
-
+    output += "<tr><th>Kode</th><th>Nama</th><th>ISBN</th><th>Tgl Pinjam</th><th>Tgl Kembali</th><th>Denda</th></tr>";
     dataPinjam.forEach(item => {
         output += `<tr>
             <td>${item.kode}</td>
             <td>${item.nama}</td>
             <td>${item.tanggalPinjam}</td>
             <td>${item.tanggalKembali ?? "-"}</td>
+            <td>${item.daftarIsbn.join(", ")}</td>
             <td>${item.denda}</td>
         </tr>`;
     });
